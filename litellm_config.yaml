@@ -1,0 +1,144 @@
+model_list:
+  # Anthropic Claude Sonnet 4.5
+  - model_name: claude-sonnet-4.5
+    litellm_params:
+      model: github_copilot/claude-sonnet-4.5
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+  # Anthropic Claude Sonnet 4
+  - model_name: claude-sonnet-4
+    litellm_params:
+      model: github_copilot/claude-sonnet-4
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+  # Anthropic Claude Haiku 4.5
+  - model_name: claude-haiku-4.5
+    litellm_params:
+      model: github_copilot/claude-haiku-4.5
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: false
+
+  # Gemini 2.5 Pro
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      model: github_copilot/gemini-2.5-pro
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+  # Gemini 3 Pro
+  - model_name: gemini-3-pro
+    litellm_params:
+      model: github_copilot/gemini-3-pro
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+  # xAI Grok Code Fast 1
+  - model_name: grok-code-fast-1
+    litellm_params:
+      model: github_copilot/grok-code-fast-1
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: false
+
+  # OpenAI GPT-4.1
+  - model_name: gpt-4.1
+    litellm_params:
+      model: github_copilot/gpt-4.1
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+  # OpenAI GPT-4o
+  - model_name: gpt-4o
+    litellm_params:
+      model: github_copilot/gpt-4o
+      api_key: os.environ/GITHUB_TOKEN
+      extra_headers:
+        editor-version: "vscode/1.85.1"
+        Copilot-Integration-Id: "vscode-chat"
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+
+# General settings
+general_settings:
+  # Master key for authentication
+  master_key: os.environ/LITELLM_MASTER_KEY
+  
+  # Database connection for virtual keys
+  database_url: os.environ/DATABASE_URL
+  
+  # Logging
+  log_level: INFO
+  
+  # Request timeout in seconds
+  request_timeout: 600
+  
+  # Enable detailed logging
+  set_verbose: false
+  
+  # Cache settings (optional)
+  cache: false
+  
+  # Enable model fallbacks
+  enable_fallbacks: true
+
+# Router settings
+router_settings:
+  routing_strategy: simple-shuffle
+  model_group_alias:
+    gpt-4: claude-sonnet-4.5
+  
+  # Rate limiting (requests per minute per model)
+  rpm_limit: 100
+  
+  # Cooldown time after rate limit in seconds
+  cooldown_time: 60
+
+# Optional: Database for logging and tracking
+# litellm_settings:
+#   success_callback: ["langfuse"]
+#   failure_callback: ["langfuse"]
