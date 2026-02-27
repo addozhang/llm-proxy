@@ -163,6 +163,20 @@ model_list:
       supports_function_calling: true
       supports_vision: true
 
+  # Azure OpenAI (Entra ID auth)
+  - model_name: azure-gpt-5-mini
+    litellm_params:
+      model: azure/gpt5_series/gpt-5-mini
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_version: "2025-01-01-preview"
+      tenant_id: os.environ/AZURE_TENANT_ID
+      client_id: os.environ/AZURE_CLIENT_ID
+      client_secret: os.environ/AZURE_CLIENT_SECRET
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: false
+
 # General settings
 general_settings:
   # Master key for authentication

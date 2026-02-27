@@ -143,6 +143,7 @@ test_model 4  "gpt-4o"                 "Write hello world in Python in one line"
 test_model 5  "grok-code-fast-1"       "Write hello world in Python"                     100
 test_model 6  "gemini-2.5-pro"         "What is the speed of light? Answer briefly."     200
 test_model 7  "gpt-5-mini"             "What is the capital of France? Answer briefly."   50
+test_model 8  "azure-gpt-5-mini"       "What is the capital of France? Answer briefly."  200
 
 # --------------------------------------------------
 # Summary

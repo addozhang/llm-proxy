@@ -53,6 +53,26 @@ docker compose down
 | `gemini-2.5-pro` | Google | Yes | Yes |
 | `gemini-3-pro-preview` | Google | Yes | Yes |
 | `gemini-3-flash-preview` | Google | Yes | Yes |
+| `azure-gpt-5-mini` | Azure OpenAI | Yes | No |
+
+### Azure OpenAI Setup
+
+`azure-gpt-5-mini` requires Azure credentials in `.env`:
+
+```bash
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_TENANT_ID=<tenant-id>
+AZURE_CLIENT_ID=<service-principal-client-id>
+AZURE_CLIENT_SECRET=<service-principal-client-secret>
+```
+
+After updating `.env`, recreate the container to apply:
+
+```bash
+docker compose up -d --force-recreate litellm
+```
+
+> **Note**: `azure-gpt-5-mini` is a reasoning model. Use `max_tokens: 200` or higher — the model uses internal reasoning tokens that count against the limit before producing visible output.
 
 ## API Examples
 
@@ -237,7 +257,7 @@ curl http://localhost:4000/models \
 
 ### Common Issues
 
-- **Empty responses from Gemini models**: Increase `max_tokens` to 200+ — Gemini uses internal thinking tokens that consume the budget.
+- **Empty responses from Gemini or Azure reasoning models**: Increase `max_tokens` to 200+ — these models use internal thinking/reasoning tokens that consume the budget before producing visible output.
 - **Auth failures (403/401)**: The OAuth token may have expired. Restart the container (`docker compose restart litellm`) and follow the device code flow in the logs.
 - **Connection refused**: Ensure `docker compose up -d` is running and the container is healthy (`docker compose ps`).
 - **Proxy interference**: If you have `http_proxy` set, add `no_proxy=localhost,127.0.0.1` to bypass it for local requests.

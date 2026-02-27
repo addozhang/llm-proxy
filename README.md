@@ -26,12 +26,16 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 ### xAI
 - **Grok Code Fast 1** (`grok-code-fast-1`)
 
-> **Note**: This setup uses a Copilot for Business account.
+### Azure OpenAI (via Entra ID)
+- **GPT-5 mini** (`azure-gpt-5-mini`)
+
+> **Note**: GitHub Copilot models use a Copilot for Business account. Azure OpenAI models require separate Azure credentials (see below).
 
 ## Prerequisites
 
 - Docker and Docker Compose
 - A GitHub account with Copilot for Business
+- (Optional) An Azure subscription with an Azure OpenAI resource for `azure-gpt-5-mini`
 
 ## Quick Start
 
@@ -115,6 +119,19 @@ Edit [`litellm_config.yaml`](litellm_config.yaml) to customize:
 - Rate limits (`rpm_limit`)
 - Request timeout
 - Logging level
+
+### Azure OpenAI (Entra ID)
+
+To use `azure-gpt-5-mini`, populate these values in `.env`:
+
+```
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_TENANT_ID=<tenant-id>
+AZURE_CLIENT_ID=<service-principal-client-id>
+AZURE_CLIENT_SECRET=<service-principal-client-secret>
+```
+
+The service principal must have the **Cognitive Services OpenAI User** role on the Azure OpenAI resource.
 
 ## Monitoring
 

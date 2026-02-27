@@ -27,6 +27,11 @@ services:
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
       - DATABASE_URL=postgresql://litellm:litellm_password@postgres:5432/litellm
       - LITELLM_LOG=INFO
+      # Azure OpenAI - Entra ID auth
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
     command: --config /app/config.yaml --port 4000
     depends_on:
       postgres:
