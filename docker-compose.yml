@@ -22,6 +22,7 @@ services:
       - "4000:4000"
     volumes:
       - ./litellm_config.yaml:/app/config.yaml
+      - copilot_tokens:/root/.config/litellm/github_copilot
     environment:
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
       - DATABASE_URL=postgresql://litellm:litellm_password@postgres:5432/litellm
@@ -40,3 +41,4 @@ services:
 
 volumes:
   postgres_data:
+  copilot_tokens:

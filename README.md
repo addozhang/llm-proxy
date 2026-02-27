@@ -1,101 +1,137 @@
 # LLM Proxy with LiteLLM Gateway
 
-This project sets up an LLM proxy using LiteLLM gateway container, configured with GitHub Copilot models.
+This project sets up an LLM proxy using a LiteLLM gateway container, configured to route requests through GitHub Copilot's backend API. It exposes an OpenAI-compatible endpoint at `http://localhost:4000`.
 
 ## Supported Models
 
-- **Anthropic Claude Sonnet 4.5** (`claude-sonnet-4.5`)
-- **Anthropic Claude Sonnet 4** (`claude-sonnet-4`)
-- **Anthropic Claude Haiku 4.5** (`claude-haiku-4.5`)
+### Anthropic
+- **Claude Sonnet 4.6** (`claude-sonnet-4.6`)
+- **Claude Opus 4.6** (`claude-opus-4.6`)
+- **Claude Sonnet 4.5** (`claude-sonnet-4.5`)
+- **Claude Opus 4.5** (`claude-opus-4.5`)
+- **Claude Haiku 4.5** (`claude-haiku-4.5`)
+
+### OpenAI
+- **GPT-5 mini** (`gpt-5-mini`)
+- **GPT-5.2** (`gpt-5.2`)
+- **GPT-4.1** (`gpt-4.1`)
+- **GPT-4o** (`gpt-4o`)
+- **GPT-4o mini** (`gpt-4o-mini`)
+
+### Google
 - **Gemini 2.5 Pro** (`gemini-2.5-pro`)
-- **Gemini 3 Pro** (`gemini-3-pro`)
-- **xAI Grok Code Fast 1** (`grok-code-fast-1`)
-- **OpenAI GPT-4.1** (`gpt-4.1`)
-- **OpenAI GPT-4o** (`gpt-4o`)
+- **Gemini 3 Pro Preview** (`gemini-3-pro-preview`)
+- **Gemini 3 Flash Preview** (`gemini-3-flash-preview`)
+
+### xAI
+- **Grok Code Fast 1** (`grok-code-fast-1`)
+
+> **Note**: This setup uses a Copilot for Business account.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed
-- GitHub Copilot API key
+- Docker and Docker Compose
+- A GitHub account with Copilot for Business
 
 ## Quick Start
 
-1. Copy the environment template:
-   ```bash
-   cp .env.example .env
-   ```
+### 1. Clone and configure
 
-2. Edit [`.env`](.env) and add your GitHub Copilot API key:
-   ```
-   GITHUB_COPILOT_API_KEY=your_github_copilot_key
-   ```
+```bash
+cp .env.example .env
+# Edit .env to set a strong LITELLM_MASTER_KEY (default: sk-1234)
+```
 
-3. Start the LiteLLM gateway:
-   ```bash
-   docker-compose up -d
-   ```
+### 2. Start the proxy
 
-4. The proxy will be available at `http://localhost:4000`
+```bash
+docker compose up -d
+```
+
+### 3. Authenticate with GitHub Copilot
+
+On first start, the container will automatically initiate a GitHub device code flow. Check the container logs:
+
+```bash
+docker compose logs -f litellm
+```
+
+You will see output like:
+
+```
+Please visit: https://github.com/login/device
+Enter code: XXXX-XXXX
+```
+
+Open the URL in your browser, enter the code, and authorize the app. The container will detect the successful authorization and proceed. If the token expires, simply restart the container and repeat this step.
+
+### 4. Verify
+
+```bash
+# Health check
+curl http://localhost:4000/health/liveliness
+
+# List models
+curl http://localhost:4000/models -H "Authorization: Bearer sk-1234"
+
+# Run the test suite
+chmod +x test.sh && ./test.sh
+```
 
 ## Usage
 
-### Making API Requests
+### Chat Completion
 
 ```bash
 curl http://localhost:4000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-master-key" \
+  -H "Authorization: Bearer sk-1234" \
   -d '{
-    "model": "claude-sonnet-4.5",
+    "model": "claude-sonnet-4.6",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
 
-### Available Model Names
+### With Python (OpenAI SDK)
 
-Use these model names in your API requests:
-- `claude-sonnet-4.5`
-- `claude-sonnet-4`
-- `claude-haiku-4.5`
-- `gemini-2.5-pro`
-- `gemini-3-pro`
-- `grok-code-fast-1`
-- `gpt-4.1`
-- `gpt-4o`
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-1234", base_url="http://localhost:4000/v1")
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4.6",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)
+```
+
+See [USAGE.md](USAGE.md) for more examples (streaming, function calling, vision, Node.js).
 
 ## Configuration
 
-The proxy configuration is in [`litellm_config.yaml`](litellm_config.yaml). You can customize:
-- Model mappings
-- Rate limits
-- Fallback models
-- Logging levels
-- Authentication settings
+Edit [`litellm_config.yaml`](litellm_config.yaml) to customize:
+- Model mappings and capabilities
+- Rate limits (`rpm_limit`)
+- Request timeout
+- Logging level
 
 ## Monitoring
 
-View logs:
 ```bash
-docker-compose logs -f litellm
-```
+# View logs
+docker compose logs -f litellm
 
-Stop the proxy:
-```bash
-docker-compose down
-```
-
-## Health Check
-
-```bash
-curl http://localhost:4000/health
+# Stop
+docker compose down
 ```
 
 ## Architecture
 
-This setup uses:
-- **LiteLLM Gateway**: Proxy server running in Docker container
-- **OpenAI-compatible API**: All requests follow OpenAI API format
-- **Multi-provider support**: Route requests to different LLM providers
+- **LiteLLM Gateway** running in Docker, exposing an OpenAI-compatible API
+- **PostgreSQL** for virtual key management and logging
+- **GitHub Copilot** as the upstream LLM provider (via `github_copilot/` model prefix)
+- OAuth token obtained via device code flow on container startup
 
 ## License
 
