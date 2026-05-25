@@ -80,14 +80,12 @@ model_list:
       supports_vision: true
 
   # OpenAI GPT-5.4 (supports both /responses and /chat/completions on Copilot)
+  # Routed via /responses to bypass the 128-tool limit of /chat/completions.
   - model_name: gpt-5.4
     litellm_params:
       model: github_copilot/gpt-5.4
-      extra_headers:
-        editor-version: "vscode/1.85.1"
-        Copilot-Integration-Id: "vscode-chat"
     model_info:
-      mode: chat
+      mode: responses
       supports_function_calling: true
       supports_vision: true
 

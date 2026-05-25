@@ -193,7 +193,7 @@ fi
 test_model           3  "claude-sonnet-4.6"  "Say hello in one sentence"                       50
 test_model           4  "gpt-4.1"            "What is the speed of light? Answer briefly."     200
 test_responses_model 5  "gpt-5.4-mini"       "What is the capital of France? Answer briefly."  100
-test_model           6  "gpt-5.4"            "What is the capital of Germany? Answer briefly."  50
+test_responses_model 6  "gpt-5.4"            "What is the capital of Germany? Answer briefly."  100
 test_responses_model 7  "gpt-5.5"            "What is the capital of Japan? Answer briefly."   100
 test_responses_model 8  "gpt-5-mini"         "What is the capital of Italy? Answer briefly."   100
 
