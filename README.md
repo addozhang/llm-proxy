@@ -17,8 +17,6 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 - **GPT-5.4 mini** (`gpt-5.4-mini`) — Responses API only
 - **GPT-5 mini** (`gpt-5-mini`) — routed via Responses API (bypasses the 128-tool limit of `/chat/completions`)
 - **GPT-4.1** (`gpt-4.1`)
-- **GPT-4o** (`gpt-4o`)
-- **GPT-4o mini** (`gpt-4o-mini`)
 
 ### Google
 - **Gemini 2.5 Pro** (`gemini-2.5-pro`)
@@ -135,7 +133,6 @@ OpenCode treats this proxy as a custom OpenAI-compatible provider. Add the block
         "gpt-5.4-mini":           { "name": "GPT-5.4 mini" },
         "gpt-5-mini":             { "name": "GPT-5 mini (>128 tools)" },
         "gpt-4.1":                { "name": "GPT-4.1" },
-        "gpt-4o":                 { "name": "GPT-4o" },
         "gemini-3-pro-preview":   { "name": "Gemini 3 Pro (Preview)" },
         "gemini-3-flash-preview": { "name": "Gemini 3 Flash (Preview)" }
       }
