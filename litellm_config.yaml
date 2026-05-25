@@ -55,10 +55,23 @@ model_list:
       supports_function_calling: true
       supports_vision: false
 
-  # OpenAI GPT-5 mini
-  - model_name: gpt-5-mini
+  # OpenAI GPT-5.4 mini
+  # NOTE: Copilot upstream only exposes the /responses endpoint for this model,
+  # so it must be called via POST /v1/responses (not /v1/chat/completions).
+  # No extra_headers: LiteLLM injects the full Copilot Responses header set
+  # (copilot-integration-id, openai-intent, x-github-api-version, ...) by default.
+  - model_name: gpt-5.4-mini
     litellm_params:
-      model: github_copilot/gpt-5-mini
+      model: github_copilot/gpt-5.4-mini
+    model_info:
+      mode: responses
+      supports_function_calling: true
+      supports_vision: true
+
+  # OpenAI GPT-5.4 (supports both /responses and /chat/completions on Copilot)
+  - model_name: gpt-5.4
+    litellm_params:
+      model: github_copilot/gpt-5.4
       extra_headers:
         editor-version: "vscode/1.85.1"
         Copilot-Integration-Id: "vscode-chat"
@@ -67,15 +80,16 @@ model_list:
       supports_function_calling: true
       supports_vision: true
 
-  # OpenAI GPT-5.2
-  - model_name: gpt-5.2
+  # OpenAI GPT-5.5
+  # NOTE: Copilot upstream only exposes the /responses endpoint for this model,
+  # so it must be called via POST /v1/responses (not /v1/chat/completions).
+  # No extra_headers: LiteLLM injects the full Copilot Responses header set
+  # (copilot-integration-id, openai-intent, x-github-api-version, ...) by default.
+  - model_name: gpt-5.5
     litellm_params:
-      model: github_copilot/gpt-5.2
-      extra_headers:
-        editor-version: "vscode/1.85.1"
-        Copilot-Integration-Id: "vscode-chat"
+      model: github_copilot/gpt-5.5
     model_info:
-      mode: chat
+      mode: responses
       supports_function_calling: true
       supports_vision: true
 
@@ -107,18 +121,6 @@ model_list:
   - model_name: gpt-4o-mini
     litellm_params:
       model: github_copilot/gpt-4o-mini
-      extra_headers:
-        editor-version: "vscode/1.85.1"
-        Copilot-Integration-Id: "vscode-chat"
-    model_info:
-      mode: chat
-      supports_function_calling: true
-      supports_vision: false
-
-  # xAI Grok Code Fast 1
-  - model_name: grok-code-fast-1
-    litellm_params:
-      model: github_copilot/grok-code-fast-1
       extra_headers:
         editor-version: "vscode/1.85.1"
         Copilot-Integration-Id: "vscode-chat"
@@ -163,19 +165,19 @@ model_list:
       supports_function_calling: true
       supports_vision: true
 
-  # Azure OpenAI (Entra ID auth)
-  - model_name: azure-gpt-5-mini
-    litellm_params:
-      model: azure/gpt5_series/gpt-5-mini
-      api_base: os.environ/AZURE_OPENAI_ENDPOINT
-      api_version: "2025-01-01-preview"
-      tenant_id: os.environ/AZURE_TENANT_ID
-      client_id: os.environ/AZURE_CLIENT_ID
-      client_secret: os.environ/AZURE_CLIENT_SECRET
-    model_info:
-      mode: chat
-      supports_function_calling: true
-      supports_vision: false
+  # Azure OpenAI (Entra ID auth) - disabled
+  # - model_name: azure-gpt-5-mini
+  #   litellm_params:
+  #     model: azure/gpt5_series/gpt-5-mini
+  #     api_base: os.environ/AZURE_OPENAI_ENDPOINT
+  #     api_version: "2025-01-01-preview"
+  #     tenant_id: os.environ/AZURE_TENANT_ID
+  #     client_id: os.environ/AZURE_CLIENT_ID
+  #     client_secret: os.environ/AZURE_CLIENT_SECRET
+  #   model_info:
+  #     mode: chat
+  #     supports_function_calling: true
+  #     supports_vision: false
 
 # General settings
 general_settings:

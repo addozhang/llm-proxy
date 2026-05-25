@@ -99,6 +99,58 @@ test_model() {
   fi
 }
 
+# Helper: make a /v1/responses request and check the response (for Copilot models
+# that only expose the Responses API, e.g. gpt-5.4-mini, gpt-5.5).
+test_responses_model() {
+  local test_num=$1
+  local model=$2
+  local prompt=$3
+  local max_tokens=${4:-50}
+
+  print_header "Test ${test_num}: ${model} (/v1/responses)"
+
+  local response
+  local http_code
+  local tmpfile
+  tmpfile=$(mktemp)
+
+  http_code=$(curl -s --max-time 120 -o "$tmpfile" -w "%{http_code}" \
+    "${PROXY_URL}/v1/responses" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${API_KEY}" \
+    -d "{
+      \"model\": \"${model}\",
+      \"input\": \"${prompt}\",
+      \"max_output_tokens\": ${max_tokens}
+    }" 2>&1)
+
+  response=$(cat "$tmpfile")
+  rm -f "$tmpfile"
+
+  if [ "$http_code" = "200" ]; then
+    # Responses API returns output as an array of items; extract any text content.
+    local content
+    content=$(echo "$response" | jq -r '
+      .output_text //
+      ([.output[]? | select(.type=="message") | .content[]? | select(.type=="output_text") | .text] | join(" ")) //
+      empty
+    ' 2>/dev/null)
+    if [ -n "$content" ] && [ "$content" != "null" ]; then
+      print_pass "${model} responded (HTTP ${http_code})"
+      echo "  Response: ${content:0:120}..."
+    else
+      print_fail "${model} returned 200 but no text content"
+      echo "  Raw: ${response:0:200}"
+    fi
+  elif [ "$http_code" = "000" ]; then
+    print_fail "${model} - connection refused (is the proxy running?)"
+  else
+    local error_msg
+    error_msg=$(echo "$response" | jq -r '.error.message // .detail // .message // empty' 2>/dev/null)
+    print_fail "${model} (HTTP ${http_code}): ${error_msg:-$response}"
+  fi
+}
+
 echo "============================================"
 echo " LiteLLM Proxy - Test Suite"
 echo " Proxy: ${PROXY_URL}"
@@ -138,12 +190,12 @@ fi
 # --------------------------------------------------
 # Tests 3-7: One model per provider family
 # --------------------------------------------------
-test_model 3  "claude-sonnet-4.6"      "Say hello in one sentence"                       50
-test_model 4  "gpt-4o"                 "Write hello world in Python in one line"          50
-test_model 5  "grok-code-fast-1"       "Write hello world in Python"                     100
-test_model 6  "gemini-2.5-pro"         "What is the speed of light? Answer briefly."     200
-test_model 7  "gpt-5-mini"             "What is the capital of France? Answer briefly."   50
-test_model 8  "azure-gpt-5-mini"       "What is the capital of France? Answer briefly."  200
+test_model           3  "claude-sonnet-4.6"  "Say hello in one sentence"                       50
+test_model           4  "gpt-4o"             "Write hello world in Python in one line"          50
+test_model           5  "gpt-4.1"            "What is the speed of light? Answer briefly."     200
+test_responses_model 6  "gpt-5.4-mini"       "What is the capital of France? Answer briefly."  100
+test_model           7  "gpt-5.4"            "What is the capital of Germany? Answer briefly."  50
+test_responses_model 8  "gpt-5.5"            "What is the capital of Japan? Answer briefly."   100
 
 # --------------------------------------------------
 # Summary
