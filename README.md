@@ -15,6 +15,7 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 - **GPT-5.5** (`gpt-5.5`) — Responses API only
 - **GPT-5.4** (`gpt-5.4`)
 - **GPT-5.4 mini** (`gpt-5.4-mini`) — Responses API only
+- **GPT-5 mini** (`gpt-5-mini`) — routed via Responses API (bypasses the 128-tool limit of `/chat/completions`)
 - **GPT-4.1** (`gpt-4.1`)
 - **GPT-4o** (`gpt-4o`)
 - **GPT-4o mini** (`gpt-4o-mini`)
@@ -132,6 +133,7 @@ OpenCode treats this proxy as a custom OpenAI-compatible provider. Add the block
         "gpt-5.5":                { "name": "GPT-5.5" },
         "gpt-5.4":                { "name": "GPT-5.4" },
         "gpt-5.4-mini":           { "name": "GPT-5.4 mini" },
+        "gpt-5-mini":             { "name": "GPT-5 mini (>128 tools)" },
         "gpt-4.1":                { "name": "GPT-4.1" },
         "gpt-4o":                 { "name": "GPT-4o" },
         "gemini-3-pro-preview":   { "name": "Gemini 3 Pro (Preview)" },
@@ -148,6 +150,7 @@ Notes:
 - `baseURL` must include the `/v1` suffix; LiteLLM exposes OpenAI-compatible routes under that prefix.
 - Restart OpenCode (or run `/connect` again) after editing, then pick a model with `/models`.
 - `gpt-5.4-mini` and `gpt-5.5` work through OpenCode as long as the AI SDK uses the Responses API for them; if you only need chat completions and hit upstream errors, switch to `gpt-5.4` which supports both endpoints on Copilot.
+- If you hit `Invalid 'tools': array too long. Expected maximum length 128` from MCP-heavy setups, use `gpt-5-mini` (or any other Responses-API model) — the `/responses` endpoint accepts far more tools than the 128-tool cap on `/chat/completions`.
 
 ## Configuration
 

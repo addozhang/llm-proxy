@@ -55,6 +55,17 @@ model_list:
       supports_function_calling: true
       supports_vision: false
 
+  # OpenAI GPT-5 mini
+  # Routed via /responses to bypass the 128-tool limit of /chat/completions
+  # (useful for OpenCode setups with many MCP tools).
+  - model_name: gpt-5-mini
+    litellm_params:
+      model: github_copilot/gpt-5-mini
+    model_info:
+      mode: responses
+      supports_function_calling: true
+      supports_vision: true
+
   # OpenAI GPT-5.4 mini
   # NOTE: Copilot upstream only exposes the /responses endpoint for this model,
   # so it must be called via POST /v1/responses (not /v1/chat/completions).
