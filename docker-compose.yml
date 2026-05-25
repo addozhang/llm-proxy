@@ -32,13 +32,6 @@ services:
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
       - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
-      # Corporate proxy (leave empty if not behind a proxy)
-      - HTTP_PROXY=${HTTP_PROXY:-}
-      - HTTPS_PROXY=${HTTPS_PROXY:-}
-      - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1,postgres}
-      # Self-signed CA bundle (set when proxy does TLS interception)
-      - SSL_CERT_FILE=${SSL_CERT_FILE:-}
-      - REQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE:-}
     command: --config /app/config.yaml --port 4000
     depends_on:
       postgres:
