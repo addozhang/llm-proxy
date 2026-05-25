@@ -170,6 +170,65 @@ AZURE_CLIENT_SECRET=<service-principal-client-secret>
 
 The service principal must have the **Cognitive Services OpenAI User** role on the Azure OpenAI resource.
 
+### Corporate proxy / self-signed CA
+
+If your network forces outbound traffic through an HTTP(S) proxy (typical in enterprise environments), you need to configure **two** layers — pulling the Docker image and the requests made by the LiteLLM container itself.
+
+**1. Docker daemon (for `docker pull`)**
+
+Configure the proxy for the Docker daemon so the `ghcr.io/berriai/litellm` image can be pulled. On Linux, create `/etc/systemd/system/docker.service.d/http-proxy.conf`:
+
+```ini
+[Service]
+Environment="HTTP_PROXY=http://proxy.corp.example:8080"
+Environment="HTTPS_PROXY=http://proxy.corp.example:8080"
+Environment="NO_PROXY=localhost,127.0.0.1,.corp.example"
+```
+
+Then `sudo systemctl daemon-reload && sudo systemctl restart docker`. On Docker Desktop (macOS/Windows), set the proxy in *Settings → Resources → Proxies*.
+
+**2. LiteLLM container (for upstream API calls)**
+
+The container needs its own proxy env vars so requests to `api.githubcopilot.com` / `github.com` go through the proxy. Add to `.env`:
+
+```
+HTTP_PROXY=http://proxy.corp.example:8080
+HTTPS_PROXY=http://proxy.corp.example:8080
+NO_PROXY=localhost,127.0.0.1,postgres
+```
+
+And reference them in `docker-compose.yml` under the `litellm` service's `environment:` block:
+
+```yaml
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - NO_PROXY=${NO_PROXY:-}
+```
+
+**3. Self-signed proxy / corporate CA**
+
+If the proxy performs TLS interception with a self-signed root CA, Python (httpx/requests) inside the container will reject upstream HTTPS by default. Mount the CA bundle and point `SSL_CERT_FILE` / `REQUESTS_CA_BUNDLE` at it:
+
+```yaml
+  litellm:
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+      - copilot_tokens:/root/.config/litellm/github_copilot
+      - ./corp-ca.crt:/etc/ssl/certs/corp-ca.crt:ro    # add this
+    environment:
+      - SSL_CERT_FILE=/etc/ssl/certs/corp-ca.crt
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/corp-ca.crt
+      - SSL_CERT_DIR=/etc/ssl/certs
+      # ... other env vars
+```
+
+For multiple CAs, concatenate them into one PEM bundle (or append to `/etc/ssl/certs/ca-certificates.crt` via a custom image). Verify inside the container:
+
+```bash
+docker exec litellm-proxy python3 -c "import ssl; print(ssl.get_default_verify_paths())"
+docker exec litellm-proxy curl -v https://api.githubcopilot.com/models 2>&1 | grep -i 'ssl\|certificate'
+```
+
 ## Monitoring
 
 ```bash
