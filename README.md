@@ -12,8 +12,9 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 - **Claude Haiku 4.5** (`claude-haiku-4.5`)
 
 ### OpenAI
-- **GPT-5 mini** (`gpt-5-mini`)
-- **GPT-5.2** (`gpt-5.2`)
+- **GPT-5.5** (`gpt-5.5`) — Responses API only
+- **GPT-5.4** (`gpt-5.4`)
+- **GPT-5.4 mini** (`gpt-5.4-mini`) — Responses API only
 - **GPT-4.1** (`gpt-4.1`)
 - **GPT-4o** (`gpt-4o`)
 - **GPT-4o mini** (`gpt-4o-mini`)
@@ -23,13 +24,10 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 - **Gemini 3 Pro Preview** (`gemini-3-pro-preview`)
 - **Gemini 3 Flash Preview** (`gemini-3-flash-preview`)
 
-### xAI
-- **Grok Code Fast 1** (`grok-code-fast-1`)
-
 ### Azure OpenAI (via Entra ID)
-- **GPT-5 mini** (`azure-gpt-5-mini`)
+- Disabled by default — uncomment the `azure-gpt-5-mini` block in `litellm_config.yaml` to enable.
 
-> **Note**: GitHub Copilot models use a Copilot for Business account. Azure OpenAI models require separate Azure credentials (see below).
+> **Note**: GitHub Copilot models use a Copilot for Business account. `gpt-5.4-mini` and `gpt-5.5` are only exposed by Copilot via the `/v1/responses` endpoint (not `/v1/chat/completions`); LiteLLM routes them correctly when `model_info.mode: responses` is set. Azure OpenAI models require separate Azure credentials (see below).
 
 ## Prerequisites
 
@@ -111,6 +109,45 @@ print(response.choices[0].message.content)
 ```
 
 See [USAGE.md](USAGE.md) for more examples (streaming, function calling, vision, Node.js).
+
+### With [OpenCode](https://opencode.ai)
+
+OpenCode treats this proxy as a custom OpenAI-compatible provider. Add the block below to your `opencode.json` (project-local at `./opencode.json` or global at `~/.config/opencode/opencode.json`):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "llm-proxy": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LiteLLM Proxy (Copilot)",
+      "options": {
+        "baseURL": "http://localhost:4000/v1",
+        "apiKey": "sk-1234"
+      },
+      "models": {
+        "claude-sonnet-4.6":      { "name": "Claude Sonnet 4.6" },
+        "claude-opus-4.6":        { "name": "Claude Opus 4.6" },
+        "claude-haiku-4.5":       { "name": "Claude Haiku 4.5" },
+        "gpt-5.5":                { "name": "GPT-5.5" },
+        "gpt-5.4":                { "name": "GPT-5.4" },
+        "gpt-5.4-mini":           { "name": "GPT-5.4 mini" },
+        "gpt-4.1":                { "name": "GPT-4.1" },
+        "gpt-4o":                 { "name": "GPT-4o" },
+        "gemini-3-pro-preview":   { "name": "Gemini 3 Pro (Preview)" },
+        "gemini-3-flash-preview": { "name": "Gemini 3 Flash (Preview)" }
+      }
+    }
+  }
+}
+```
+
+Notes:
+
+- Replace `apiKey` with the value of `LITELLM_MASTER_KEY` from your `.env` (default `sk-1234`).
+- `baseURL` must include the `/v1` suffix; LiteLLM exposes OpenAI-compatible routes under that prefix.
+- Restart OpenCode (or run `/connect` again) after editing, then pick a model with `/models`.
+- `gpt-5.4-mini` and `gpt-5.5` work through OpenCode as long as the AI SDK uses the Responses API for them; if you only need chat completions and hit upstream errors, switch to `gpt-5.4` which supports both endpoints on Copilot.
 
 ## Configuration
 
