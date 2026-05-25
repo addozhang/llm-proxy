@@ -3,14 +3,14 @@ services:
     image: postgres:16-alpine
     container_name: litellm-postgres
     environment:
-      POSTGRES_USER: litellm
-      POSTGRES_PASSWORD: litellm_password
-      POSTGRES_DB: litellm
+      POSTGRES_USER: ${POSTGRES_USER:-litellm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-litellm_password}
+      POSTGRES_DB: ${POSTGRES_DB:-litellm}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-litellm}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,7 +25,7 @@ services:
       - copilot_tokens:/root/.config/litellm/github_copilot
     environment:
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
-      - DATABASE_URL=postgresql://litellm:litellm_password@postgres:5432/litellm
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD:-litellm_password}@postgres:5432/${POSTGRES_DB:-litellm}
       - LITELLM_LOG=INFO
       # Azure OpenAI - Entra ID auth
       - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
