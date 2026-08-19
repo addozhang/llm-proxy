@@ -4,29 +4,38 @@ This project sets up an LLM proxy using a LiteLLM gateway container, configured 
 
 ## Supported Models
 
+Only the latest release per vendor line is kept configured; older, superseded
+models (e.g. `claude-sonnet-4.6`, `gpt-5.4`, `gemini-3-pro-preview`) are pruned
+from `litellm_config.yaml` to keep the model list current. Re-add any of them
+by copying a block from git history if you need to pin an older version.
+
 ### Anthropic
-- **Claude Sonnet 4.6** (`claude-sonnet-4.6`)
-- **Claude Opus 4.6** (`claude-opus-4.6`)
-- **Claude Sonnet 4.5** (`claude-sonnet-4.5`)
-- **Claude Opus 4.5** (`claude-opus-4.5`)
+- **Claude Opus 5** (`claude-opus-5`)
+- **Claude Sonnet 5** (`claude-sonnet-5`)
 - **Claude Haiku 4.5** (`claude-haiku-4.5`)
+- **Claude Fable 5** (`claude-fable-5`)
 
 ### OpenAI
-- **GPT-5.5** (`gpt-5.5`) — Responses API only
-- **GPT-5.4** (`gpt-5.4`)
-- **GPT-5.4 mini** (`gpt-5.4-mini`) — Responses API only
-- **GPT-5 mini** (`gpt-5-mini`) — routed via Responses API (bypasses the 128-tool limit of `/chat/completions`)
-- **GPT-4.1** (`gpt-4.1`)
+- **GPT-5.6 Luna** (`gpt-5.6-luna`) — Responses API only
+- **GPT-5.6 Sol** (`gpt-5.6-sol`) — Responses API only
+- **GPT-5.6 Terra** (`gpt-5.6-terra`) — Responses API only
 
 ### Google
-- **Gemini 2.5 Pro** (`gemini-2.5-pro`)
-- **Gemini 3 Pro Preview** (`gemini-3-pro-preview`)
-- **Gemini 3 Flash Preview** (`gemini-3-flash-preview`)
+- **Gemini 3.7 Flash** (`gemini-3.7-flash`)
+
+### xAI
+- **Grok 4.6** (`grok-4.6`) — Responses API only
+
+### Moonshot AI
+- **Kimi K3** (`kimi-k3`)
+
+### Microsoft
+- **MAI Code 1.1 Flash** (`mai-code-1.1-flash`) — Responses API only
 
 ### Azure OpenAI (via Entra ID)
 - Disabled by default — uncomment the `azure-gpt-5-mini` block in `litellm_config.yaml` to enable.
 
-> **Note**: GitHub Copilot models use a Copilot for Business account. `gpt-5.4-mini` and `gpt-5.5` are only exposed by Copilot via the `/v1/responses` endpoint (not `/v1/chat/completions`); LiteLLM routes them correctly when `model_info.mode: responses` is set. Azure OpenAI models require separate Azure credentials (see below).
+> **Note**: GitHub Copilot models use a Copilot for Business account. The `gpt-5.6` trio, `grok-4.6`, and `mai-code-1.1-flash` are only exposed by Copilot via the `/v1/responses` endpoint (not `/v1/chat/completions`); LiteLLM routes them correctly when `model_info.mode: responses` is set. Reasoning-capable models (`claude-opus-5`, `gemini-3.7-flash`, the `gpt-5.6` trio) spend part of their `max_tokens`/`max_output_tokens` budget on internal thinking before the visible answer — set that budget generously (a few hundred tokens minimum) or you'll get an empty response. Azure OpenAI models require separate Azure credentials (see below).
 
 ## Prerequisites
 
@@ -88,8 +97,9 @@ curl http://localhost:4000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-1234" \
   -d '{
-    "model": "claude-sonnet-4.6",
-    "messages": [{"role": "user", "content": "Hello!"}]
+    "model": "claude-sonnet-5",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 300
   }'
 ```
 
@@ -101,8 +111,9 @@ from openai import OpenAI
 client = OpenAI(api_key="sk-1234", base_url="http://localhost:4000/v1")
 
 response = client.chat.completions.create(
-    model="claude-sonnet-4.6",
-    messages=[{"role": "user", "content": "Hello!"}]
+    model="claude-sonnet-5",
+    messages=[{"role": "user", "content": "Hello!"}],
+    max_tokens=300
 )
 print(response.choices[0].message.content)
 ```
@@ -125,16 +136,17 @@ OpenCode treats this proxy as a custom OpenAI-compatible provider. Add the block
         "apiKey": "sk-1234"
       },
       "models": {
-        "claude-sonnet-4.6":      { "name": "Claude Sonnet 4.6" },
-        "claude-opus-4.6":        { "name": "Claude Opus 4.6" },
-        "claude-haiku-4.5":       { "name": "Claude Haiku 4.5" },
-        "gpt-5.5":                { "name": "GPT-5.5" },
-        "gpt-5.4":                { "name": "GPT-5.4" },
-        "gpt-5.4-mini":           { "name": "GPT-5.4 mini" },
-        "gpt-5-mini":             { "name": "GPT-5 mini (>128 tools)" },
-        "gpt-4.1":                { "name": "GPT-4.1" },
-        "gemini-3-pro-preview":   { "name": "Gemini 3 Pro (Preview)" },
-        "gemini-3-flash-preview": { "name": "Gemini 3 Flash (Preview)" }
+        "claude-opus-5":        { "name": "Claude Opus 5" },
+        "claude-sonnet-5":      { "name": "Claude Sonnet 5" },
+        "claude-haiku-4.5":     { "name": "Claude Haiku 4.5" },
+        "claude-fable-5":       { "name": "Claude Fable 5" },
+        "gpt-5.6-luna":         { "name": "GPT-5.6 Luna" },
+        "gpt-5.6-sol":          { "name": "GPT-5.6 Sol" },
+        "gpt-5.6-terra":        { "name": "GPT-5.6 Terra" },
+        "gemini-3.7-flash":     { "name": "Gemini 3.7 Flash" },
+        "grok-4.6":             { "name": "Grok 4.6" },
+        "kimi-k3":              { "name": "Kimi K3" },
+        "mai-code-1.1-flash":   { "name": "MAI Code 1.1 Flash" }
       }
     }
   }
@@ -146,8 +158,9 @@ Notes:
 - Replace `apiKey` with the value of `LITELLM_MASTER_KEY` from your `.env` (default `sk-1234`).
 - `baseURL` must include the `/v1` suffix; LiteLLM exposes OpenAI-compatible routes under that prefix.
 - Restart OpenCode (or run `/connect` again) after editing, then pick a model with `/models`.
-- `gpt-5.4-mini` and `gpt-5.5` work through OpenCode as long as the AI SDK uses the Responses API for them; if you only need chat completions and hit upstream errors, switch to `gpt-5.4` which supports both endpoints on Copilot.
-- If you hit `Invalid 'tools': array too long. Expected maximum length 128` from MCP-heavy setups, use `gpt-5-mini` (or any other Responses-API model) — the `/responses` endpoint accepts far more tools than the 128-tool cap on `/chat/completions`.
+- `gpt-5.6-luna/sol/terra`, `grok-4.6`, and `mai-code-1.1-flash` are Responses-API-only on Copilot; the AI SDK must dispatch them via `/v1/responses`, which this proxy's `model_info.mode: responses` setting handles server-side.
+- Reasoning models (`claude-opus-5`, `gemini-3.7-flash`, the `gpt-5.6` trio) burn part of their token budget on internal thinking before the visible answer — configure a generous `max_tokens`/`max_output_tokens` (a few hundred at minimum) or you'll get an empty reply.
+- If you hit `Invalid 'tools': array too long. Expected maximum length 128` from MCP-heavy setups, use one of the Responses-API models above — the `/responses` endpoint accepts far more tools than the 128-tool cap on `/chat/completions`.
 
 ## Configuration
 

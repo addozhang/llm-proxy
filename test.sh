@@ -100,7 +100,7 @@ test_model() {
 }
 
 # Helper: make a /v1/responses request and check the response (for Copilot models
-# that only expose the Responses API, e.g. gpt-5.4-mini, gpt-5.5).
+# that only expose the Responses API, e.g. gpt-5.6-luna, grok-4.6).
 test_responses_model() {
   local test_num=$1
   local model=$2
@@ -188,14 +188,16 @@ else
 fi
 
 # --------------------------------------------------
-# Tests 3-7: One model per provider family
+# Tests 3-10: One model per provider family
 # --------------------------------------------------
-test_model           3  "claude-sonnet-4.6"  "Say hello in one sentence"                       50
-test_model           4  "gpt-4.1"            "What is the speed of light? Answer briefly."     200
-test_responses_model 5  "gpt-5.4-mini"       "What is the capital of France? Answer briefly."  100
-test_responses_model 6  "gpt-5.4"            "What is the capital of Germany? Answer briefly."  100
-test_responses_model 7  "gpt-5.5"            "What is the capital of Japan? Answer briefly."   100
-test_responses_model 8  "gpt-5-mini"         "What is the capital of Italy? Answer briefly."   100
+test_model           3  "claude-sonnet-5"      "Say hello in one sentence"                       300
+test_model           4  "gemini-3.7-flash"     "What is the speed of light? Answer briefly."     300
+test_model           5  "kimi-k3"              "What is the capital of Spain? Answer briefly."   200
+test_responses_model 6  "gpt-5.6-luna"         "What is the capital of France? Answer briefly."  300
+test_responses_model 7  "gpt-5.6-sol"          "What is the capital of Germany? Answer briefly." 300
+test_responses_model 8  "gpt-5.6-terra"        "What is the capital of Japan? Answer briefly."   300
+test_responses_model 9  "grok-4.6"             "What is the capital of Italy? Answer briefly."   300
+test_responses_model 10 "mai-code-1.1-flash"   "What is the capital of Canada? Answer briefly."  300
 
 # --------------------------------------------------
 # Summary
