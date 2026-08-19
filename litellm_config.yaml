@@ -162,6 +162,14 @@ router_settings:
   # Cooldown time after rate limit in seconds
   cooldown_time: 60
 
+# Global LiteLLM SDK settings
+litellm_settings:
+  # Silently drop request params a model doesn't support (e.g. reasoning_effort
+  # on gemini/grok/kimi/mai-code) instead of failing the call with a 400
+  # UnsupportedParamsError. Models that DO support it (gpt-5.6 trio) are
+  # unaffected; models where it's a no-op (claude-*) still accept it as before.
+  drop_params: true
+
 # Optional: Database for logging and tracking
 # litellm_settings:
 #   success_callback: ["langfuse"]
